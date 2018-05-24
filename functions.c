@@ -249,6 +249,7 @@ unsigned char* binarizeImage(unsigned char* array, bmpInfoHeader bInfoHeader,int
 char* nearlyBlack(unsigned char* array, bmpInfoHeader bInfoHeader,int umbralPorcentaje){
   int i,j,prom,azul,verde,rojo,indice=0;
   float negro,blanco;
+  float newUmbral= umbralPorcentaje;
   negro=0;
   blanco=0;
   //Se recorre segun ancho y largo
@@ -270,10 +271,12 @@ char* nearlyBlack(unsigned char* array, bmpInfoHeader bInfoHeader,int umbralPorc
            indice++;//estoy en blue del proximo j
 		  }
 	}
-  if((negro/(negro+blanco))>=(float)(umbralPorcentaje/100)){
+  if((negro/(negro+blanco))>=(newUmbral/100)){
+      //printf("%f >?< %f",(negro/(negro+blanco)),(newUmbral/100));
       return "yes";
   }
   else{
+    //printf("%f >?< %f",(negro/(negro+blanco)),(newUmbral/100));
     return "no";
   }
 }
