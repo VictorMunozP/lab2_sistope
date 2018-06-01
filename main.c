@@ -38,6 +38,10 @@ int main(int argc, char** argv){
       case 'u':
         if(isInt(optarg)){
           umbralBin=atoi(optarg);
+          if(umbralBin<0 || umbralBin>255){
+            printf("Not valid input -u (only integer [0,255] numbers!)\n");
+            return 0;
+          }
           //printf("UMBRAL to Bin is: %i\n",umbralBin);
         }
         else{
@@ -48,6 +52,10 @@ int main(int argc, char** argv){
       case 'n':
         if(isInt(optarg)){
           umbralClas=atoi(optarg);
+          if(umbralClas<0 || umbralClas>100){
+            printf("Not valid input -n (only integer [0,100] numbers!)\n");
+            return 0;
+          }
           //printf("UMBRAL to classify is:%i\n",umbralClas);
         }
         else{
