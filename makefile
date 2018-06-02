@@ -1,29 +1,13 @@
-CC=gcc
+compile:
+	gcc -o pipeline main.c functions.c -Wall
+	gcc -o lectorImagen imageReader.c -Wall
+	gcc -o conversorGris imageToGrayScale.c -Wall
+	gcc -o binarizarImagen imageBinarizer.c -Wall
+	gcc -o analisisPropiedad nearlyBlack.c -Wall
+	gcc -o crearImagen imageWriter.c -Wall
 
-all: main.o functions.o imageReader.o imageToGrayScale.o imageBinarizer.o nearlyBlack.o imageWriter.o
-		$(CC) main.o functions.o imageReader.o imageToGrayScale.o imageBinarizer.o nearlyBlack.o imageWriter.o -Wall -o pipeline
-		rm *.o
 
-main.o: main.c
-				$(CC) main.c -Wall -c -o main.o
-
-functions.o: functions.c functions.h
-		$(CC) functions.c -Wall -c -o functions.o
-
-imageReader.o: imageReader.c functions.h
-		$(CC) imageReader.c -Wall -c -o imageReader.o
-
-imageToGrayScale.o: imageToGrayScale.c functions.h
-		$(CC) imageToGrayScale.c -Wall -c -o imageToGrayScale.o
-
-imageBinarizer.o: imageBinarizer.c functions.h
-		$(CC) imageBinarizer.c -Wall -c -o imageBinarizer.o
-
-nearlyBlack.o: nearlyBlack.c functions.h
-		$(CC) nearlyBlack.c -Wall -c -o nearlyBlack.o
-
-imageWriter.o: imageWriter.c functions.h
-		$(CC) imageWriter.c -Wall -c -o imageWriter.o
+	@echo " ./pipeline -c num imgs -u umbral -n umbral -b "
 
 clean:
-	rm pipeline  output*.bmp
+	rm pipeline lectorImagen conversorGris binarizarImagen analisisPropiedad crearImagen

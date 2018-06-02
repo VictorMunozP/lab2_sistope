@@ -3,6 +3,7 @@
 
 #include <fcntl.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,9 +19,13 @@
 * @return entero
 */
 int main(int argc, char** argv){
-  int a, numImages,umbralBin,umbralClas,i,imprimir=0;
-  bmpInfoHeader bInfoHeader;
-	bmpFileHeader header;
+  int a,pid,status,numImages,umbralBin,umbralClas,i,imprimir=0;
+  //bmpInfoHeader bInfoHeader;
+	//bmpFileHeader header;
+  char* array1=(char*)malloc(sizeof(char)*16);
+  char* array2=(char*)malloc(sizeof(char)*16);
+  char* array3=(char*)malloc(sizeof(char)*16);
+  char* array4=(char*)malloc(sizeof(char)*16);
 
   //Ciclo while para uso de funcion getopt
   while ((a = getopt (argc, argv, "bc:u:n:")) != -1){
@@ -79,15 +84,15 @@ int main(int argc, char** argv){
     }//fin del switch
   }//fin del while
 
-
+  /*
   if(imprimir==1){//la variable imprimir es seteada en 1 segun la bandera -b
     printf("|    image   | nearly black  |\n");
     printf("|------------|---------------|\n");
   }
-
+  */
   //ciclo for para procesar las imagenes, una a la vez
   for(i=1;i<numImages+1;i++){
-
+    /*
     //Se construye nombre de entrada de las imagenes segun enunciado
     char* nombreEntrada=malloc(sizeof(char)*22);
     nombreEntrada=setNameInput(i);
@@ -110,12 +115,42 @@ int main(int argc, char** argv){
     if(imprimir==1){
       char* answerNB=malloc(sizeof(char)*4);
       answerNB=nearlyBlack(imagen2,bInfoHeader,umbralClas);
-      printf("|  imagen_%d  |      %s      |\n",i,answerNB);
+      if(answerNB[0]=='y'){
+        printf("|  imagen_%d  |      %s      |\n",i,answerNB);
+      }
+      else{
+          printf("|  imagen_%d  |      %s       |\n",i,answerNB);
+      }
+
     }
     free(imagen);
     free(imagen2);
+    */
+    char* nombreEntrada=malloc(sizeof(char)*22);
+    nombreEntrada=setNameInput(i);
+    char* nombreSalidaGS=malloc(sizeof(char)*22);
+    nombreSalidaGS=setNameOutputGS(i);
+    char* nombreSalidaBin=malloc(sizeof(char)*22);
+    nombreSalidaBin=setNameOutputBin(i);
 
+    pid=fork();
+    if (pid<0){
+        printf("Error: child not created\n");
+        return 0;
+    }
+    if(pid==0){
+      sprintf(array1, "%d", umbralBin);
+      sprintf(array2, "%d", umbralClas);
+      sprintf(array3, "%d", imprimir);
+      sprintf(array4, "%d", numImages);
+      char *arreglos[] = {nombreEntrada,array1,array2,array3,array4,nombreSalidaGS,nombreSalidaBin,NULL};
+      execv("./lectorImagen",arreglos);
+    }
+    else{
+      waitpid(pid, &status, 0);
+    }
   }//fin del ciclo for para procesar las imagenes
-
+  printf("Ingresa un char para terminar\n");
+    getc(stdin);
   return 0;
 }

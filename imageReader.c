@@ -54,9 +54,51 @@ unsigned char* loadImage(char* filename, bmpInfoHeader* bInfoHeader, bmpFileHead
   /*Se retorna la imagen */
   return imgdata;
 }
-/*
-int main(int arg, char** argv){
 
+int main(int arg, char** argv){
+  pid_t pid;
+  int status;
+  int tuberia[2];
+  bmpInfoHeader binformacion;
+  bmpFileHeader bcabecera;
+  unsigned char* data_imagen;
+  char* cambio = (char*)malloc(sizeof(char)*2);
+  //Los parametros que son recibidos como char, se transforma en enteros para su posterior utilizacion
+  data_imagen = loadImage(argv[0],&binformacion,&bcabecera);
+  pipe(tuberia);
+  pid = fork();
+      if (pid < 0){
+          printf("Error: child process not created\n");
+          return 0;
+      }
+      if(pid == 0){
+  	     sprintf(cambio,"%d",tuberia[0]);
+         char *arreglos[] = {argv[1],argv[2],argv[3],cambio,argv[4],argv[5],argv[6],NULL};
+         execv("./conversorGris",arreglos);
+       }
+       else{
+         close(tuberia[0]);
+         write(tuberia[1],&bcabecera.size,sizeof(uint32_t));
+         write(tuberia[1],&bcabecera.resv1,sizeof(uint16_t));
+         write(tuberia[1],&bcabecera.resv2,sizeof(uint16_t));
+         write(tuberia[1],&bcabecera.offset,sizeof(uint32_t));
+
+         write(tuberia[1],&binformacion.headersize,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.width,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.height,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.planes,sizeof(uint16_t));
+         write(tuberia[1],&binformacion.bpp,sizeof(uint16_t));
+         write(tuberia[1],&binformacion.compress,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.imgsize,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.bpmx,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.bpmy,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.colors,sizeof(uint32_t));
+         write(tuberia[1],&binformacion.imxtcolors,sizeof(uint32_t));
+
+         for(int i = 0;i < binformacion.imgsize;i++){
+           write(tuberia[1],&data_imagen[i],sizeof(unsigned char));
+         }
+         waitpid(pid, &status, 0);
+       }
   return 0;
 }
-*/
