@@ -7,4 +7,4 @@ compile:
 	gcc -o imageWriter imageWriter.c -Wall
 
 clean:
-	rm pipeline imageReader imageToGrayScale imageBinarizer nearlyBlack imageWriter
+	rm pipeline imageReader imageToGrayScale imageBinarizer nearlyBlack imageWriter output*

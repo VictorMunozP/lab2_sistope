@@ -142,8 +142,10 @@ int main(int argc, char** argv){
       waitpid(pid, &status, 0);
     }
   }//fin del ciclo for para procesar las imagenes
+  /*
   free(nombreEntrada);
   free(nombreSalidaGS);
   free(nombreSalidaBin);
+  */
   return 0;
 }
