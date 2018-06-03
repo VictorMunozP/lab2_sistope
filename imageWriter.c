@@ -55,27 +55,27 @@ void saveImage(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader he
 int main(int argc,char *argv[]) {
     bmpInfoHeader binformacion;
     bmpFileHeader bcabecera;
-    int tuberia = atoi(argv[0]);
-    read(tuberia,&bcabecera.size,sizeof(uint32_t));
-    read(tuberia,&bcabecera.resv1,sizeof(uint16_t));
-    read(tuberia,&bcabecera.resv2,sizeof(uint16_t));
-    read(tuberia,&bcabecera.offset,sizeof(uint32_t));
+    int pipeline = atoi(argv[0]);
+    read(pipeline,&bcabecera.size,sizeof(uint32_t));
+    read(pipeline,&bcabecera.resv1,sizeof(uint16_t));
+    read(pipeline,&bcabecera.resv2,sizeof(uint16_t));
+    read(pipeline,&bcabecera.offset,sizeof(uint32_t));
 
-    read(tuberia,&binformacion.headersize,sizeof(uint32_t));
-    read(tuberia,&binformacion.width,sizeof(uint32_t));
-    read(tuberia,&binformacion.height,sizeof(uint32_t));
-    read(tuberia,&binformacion.planes,sizeof(uint16_t));
-    read(tuberia,&binformacion.bpp,sizeof(uint16_t));
-    read(tuberia,&binformacion.compress,sizeof(uint32_t));
-    read(tuberia,&binformacion.imgsize,sizeof(uint32_t));
-    read(tuberia,&binformacion.bpmx,sizeof(uint32_t));
-    read(tuberia,&binformacion.bpmy,sizeof(uint32_t));
-    read(tuberia,&binformacion.colors,sizeof(uint32_t));
-    read(tuberia,&binformacion.imxtcolors,sizeof(uint32_t));
+    read(pipeline,&binformacion.headersize,sizeof(uint32_t));
+    read(pipeline,&binformacion.width,sizeof(uint32_t));
+    read(pipeline,&binformacion.height,sizeof(uint32_t));
+    read(pipeline,&binformacion.planes,sizeof(uint16_t));
+    read(pipeline,&binformacion.bpp,sizeof(uint16_t));
+    read(pipeline,&binformacion.compress,sizeof(uint32_t));
+    read(pipeline,&binformacion.imgsize,sizeof(uint32_t));
+    read(pipeline,&binformacion.bpmx,sizeof(uint32_t));
+    read(pipeline,&binformacion.bpmy,sizeof(uint32_t));
+    read(pipeline,&binformacion.colors,sizeof(uint32_t));
+    read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
 
     unsigned char *data_writer = (unsigned char*)malloc(binformacion.imgsize * sizeof(unsigned char));
     for(int i = 0;i < binformacion.imgsize;i++){
-        read(tuberia,&data_writer[i],sizeof(unsigned char));
+        read(pipeline,&data_writer[i],sizeof(unsigned char));
     }
 
     saveImage(data_writer,binformacion,bcabecera,argv[1]);

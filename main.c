@@ -134,7 +134,7 @@ int main(int argc, char** argv){
       sprintf(charUmbralBin, "%d", umbralBin);
       sprintf(charUmbralClas, "%d", umbralClas);
       sprintf(charImprimir, "%d", imprimir);
-      sprintf(charNumImages, "%d", numImages);
+      sprintf(charNumImages, "%d", i);
       char *argumentos[] = {nombreEntrada,charUmbralBin,charUmbralClas,charImprimir,charNumImages,nombreSalidaGS,nombreSalidaBin,NULL};
       execv("./imageReader",argumentos);
     }
@@ -142,10 +142,6 @@ int main(int argc, char** argv){
       waitpid(pid, &status, 0);
     }
   }//fin del ciclo for para procesar las imagenes
-  /*
-  free(nombreEntrada);
-  free(nombreSalidaGS);
-  free(nombreSalidaBin);
-  */
+
   return 0;
 }

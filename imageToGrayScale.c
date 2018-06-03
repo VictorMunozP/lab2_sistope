@@ -76,33 +76,33 @@ void saveImageGS(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader 
 int main(int argc,char* argv[]) {
     pid_t pid;
     int status;
-    int tuberiaC[2];
+    int pipelineC[2];
 
     bmpInfoHeader binformacion;
     bmpFileHeader bcabecera;
-    int tuberia = atoi(argv[3]);
+    int pipeline = atoi(argv[3]);
     char *cambio = (char *)malloc(2 * sizeof(char));
     //lectura de la data en el pipe
-    read(tuberia,&bcabecera.size,sizeof(uint32_t));
-    read(tuberia,&bcabecera.resv1,sizeof(uint16_t));
-    read(tuberia,&bcabecera.resv2,sizeof(uint16_t));
-    read(tuberia,&bcabecera.offset,sizeof(uint32_t));
+    read(pipeline,&bcabecera.size,sizeof(uint32_t));
+    read(pipeline,&bcabecera.resv1,sizeof(uint16_t));
+    read(pipeline,&bcabecera.resv2,sizeof(uint16_t));
+    read(pipeline,&bcabecera.offset,sizeof(uint32_t));
 
-    read(tuberia,&binformacion.headersize,sizeof(uint32_t));
-    read(tuberia,&binformacion.width,sizeof(uint32_t));
-    read(tuberia,&binformacion.height,sizeof(uint32_t));
-    read(tuberia,&binformacion.planes,sizeof(uint16_t));
-    read(tuberia,&binformacion.bpp,sizeof(uint16_t));
-    read(tuberia,&binformacion.compress,sizeof(uint32_t));
-    read(tuberia,&binformacion.imgsize,sizeof(uint32_t));
-    read(tuberia,&binformacion.bpmx,sizeof(uint32_t));
-    read(tuberia,&binformacion.bpmy,sizeof(uint32_t));
-    read(tuberia,&binformacion.colors,sizeof(uint32_t));
-    read(tuberia,&binformacion.imxtcolors,sizeof(uint32_t));
+    read(pipeline,&binformacion.headersize,sizeof(uint32_t));
+    read(pipeline,&binformacion.width,sizeof(uint32_t));
+    read(pipeline,&binformacion.height,sizeof(uint32_t));
+    read(pipeline,&binformacion.planes,sizeof(uint16_t));
+    read(pipeline,&binformacion.bpp,sizeof(uint16_t));
+    read(pipeline,&binformacion.compress,sizeof(uint32_t));
+    read(pipeline,&binformacion.imgsize,sizeof(uint32_t));
+    read(pipeline,&binformacion.bpmx,sizeof(uint32_t));
+    read(pipeline,&binformacion.bpmy,sizeof(uint32_t));
+    read(pipeline,&binformacion.colors,sizeof(uint32_t));
+    read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
 
     unsigned char *data_imagen = (unsigned char*)malloc(binformacion.imgsize* sizeof(unsigned char));
     for(int i = 0;i < binformacion.imgsize;i++){
-        read(tuberia,&data_imagen[i],sizeof(unsigned char));
+        read(pipeline,&data_imagen[i],sizeof(unsigned char));
     }
     unsigned char* data_grisaseos=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
 
@@ -110,40 +110,40 @@ int main(int argc,char* argv[]) {
     rgbToGrayScale(data_grisaseos,binformacion);
     saveImageGS(data_grisaseos,binformacion,bcabecera,argv[5]);
 
-    pipe(tuberiaC);
+    pipe(pipelineC);
     pid = fork();
     if (pid < 0){
         printf("Error al crear proceso hijo \n");
         return 0;
     }
     if(pid == 0){
-        sprintf(cambio,"%d",tuberiaC[0]);
-        char *arreglos[] = {argv[0],argv[1],argv[2],cambio,argv[4],argv[5],argv[6],NULL};
+        sprintf(cambio,"%d",pipelineC[0]);
+        char *arreglos[] = {argv[0],argv[1],argv[2],cambio,argv[4],argv[5],argv[6],argv[7],NULL};
         execv("./imageBinarizer",arreglos);
         //printf("Soy el hijo %d de conversorGris (%d)",getpid(),getppid());
     }
     else{
-        close(tuberiaC[0]);
-        write(tuberiaC[1],&bcabecera.size,sizeof(uint32_t));
-        write(tuberiaC[1],&bcabecera.resv1,sizeof(uint16_t));
-        write(tuberiaC[1],&bcabecera.resv2,sizeof(uint16_t));
-        write(tuberiaC[1],&bcabecera.offset,sizeof(uint32_t));
+        close(pipelineC[0]);
+        write(pipelineC[1],&bcabecera.size,sizeof(uint32_t));
+        write(pipelineC[1],&bcabecera.resv1,sizeof(uint16_t));
+        write(pipelineC[1],&bcabecera.resv2,sizeof(uint16_t));
+        write(pipelineC[1],&bcabecera.offset,sizeof(uint32_t));
 
-        write(tuberiaC[1],&binformacion.headersize,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.width,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.height,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.planes,sizeof(uint16_t));
-        write(tuberiaC[1],&binformacion.bpp,sizeof(uint16_t));
-        write(tuberiaC[1],&binformacion.compress,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.imgsize,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.bpmx,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.bpmy,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.colors,sizeof(uint32_t));
-        write(tuberiaC[1],&binformacion.imxtcolors,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.headersize,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.width,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.height,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.planes,sizeof(uint16_t));
+        write(pipelineC[1],&binformacion.bpp,sizeof(uint16_t));
+        write(pipelineC[1],&binformacion.compress,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.imgsize,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.bpmx,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.bpmy,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.colors,sizeof(uint32_t));
+        write(pipelineC[1],&binformacion.imxtcolors,sizeof(uint32_t));
 
 
         for(int i = 0;i < binformacion.imgsize;i++){
-            write(tuberiaC[1],&data_imagen[i],sizeof(unsigned char));
+            write(pipelineC[1],&data_imagen[i],sizeof(unsigned char));
         }
         free(data_grisaseos);
         waitpid(pid, &status, 0);

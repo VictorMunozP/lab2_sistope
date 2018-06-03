@@ -18,4 +18,4 @@ unsigned char* rgbToGrayScale(unsigned char* array, bmpInfoHeader bInfoHeader);
 
 unsigned char* binarizeImage(unsigned char* array, bmpInfoHeader bInfoHeader,int umbral);
 
-void nearlyBlack(unsigned char* array, bmpInfoHeader bInfoHeader,int umbral);
+char* nearlyBlack(unsigned char* array, bmpInfoHeader bInfoHeader,int umbral);
