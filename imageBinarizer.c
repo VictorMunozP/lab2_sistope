@@ -116,7 +116,7 @@ int main(int argc,char *argv[]) {
 
         sprintf(cambio,"%d",tuberiaB[0]);
         char *arreglos[] = {argv[1],argv[2],cambio,argv[4],argv[5],argv[6],NULL};
-        execv("./analisisPropiedad",arreglos);
+        execv("./nearlyBlack",arreglos);
     }
     else{
         close(tuberiaB[0]);

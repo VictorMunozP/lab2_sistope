@@ -74,7 +74,7 @@ int main(int arg, char** argv){
       if(pid == 0){
   	     sprintf(cambio,"%d",tuberia[0]);
          char *arreglos[] = {argv[1],argv[2],argv[3],cambio,argv[4],argv[5],argv[6],NULL};
-         execv("./conversorGris",arreglos);
+         execv("./imageToGrayScale",arreglos);
        }
        else{
          close(tuberia[0]);

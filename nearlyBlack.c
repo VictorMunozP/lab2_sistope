@@ -127,7 +127,7 @@ int main(int argc,char *argv[]) {
     if(pid == 0){
         sprintf(cambio,"%d",tuberiaB[0]);
         char *arreglos[] = {cambio,argv[5],NULL};
-        execv("./crearImagen",arreglos);
+        execv("./imageWriter",arreglos);
     }
     else{
         close(tuberiaB[0]);

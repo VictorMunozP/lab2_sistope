@@ -119,7 +119,7 @@ int main(int argc,char* argv[]) {
     if(pid == 0){
         sprintf(cambio,"%d",tuberiaC[0]);
         char *arreglos[] = {argv[0],argv[1],argv[2],cambio,argv[4],argv[5],argv[6],NULL};
-        execv("./binarizarImagen",arreglos);
+        execv("./imageBinarizer",arreglos);
         //printf("Soy el hijo %d de conversorGris (%d)",getpid(),getppid());
     }
     else{

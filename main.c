@@ -20,12 +20,10 @@
 */
 int main(int argc, char** argv){
   int a,pid,status,numImages,umbralBin,umbralClas,i,imprimir=0;
-  //bmpInfoHeader bInfoHeader;
-	//bmpFileHeader header;
-  char* array1=(char*)malloc(sizeof(char)*16);
-  char* array2=(char*)malloc(sizeof(char)*16);
-  char* array3=(char*)malloc(sizeof(char)*16);
-  char* array4=(char*)malloc(sizeof(char)*16);
+  char* charUmbralBin=(char*)malloc(sizeof(char)*16);
+  char* charUmbralClas=(char*)malloc(sizeof(char)*16);
+  char* charImprimir=(char*)malloc(sizeof(char)*16);
+  char* charNumImages=(char*)malloc(sizeof(char)*16);
 
   //Ciclo while para uso de funcion getopt
   while ((a = getopt (argc, argv, "bc:u:n:")) != -1){
@@ -84,12 +82,6 @@ int main(int argc, char** argv){
     }//fin del switch
   }//fin del while
 
-  /*
-  if(imprimir==1){//la variable imprimir es seteada en 1 segun la bandera -b
-    printf("|    image   | nearly black  |\n");
-    printf("|------------|---------------|\n");
-  }
-  */
   //ciclo for para procesar las imagenes, una a la vez
   for(i=1;i<numImages+1;i++){
     /*
@@ -139,18 +131,19 @@ int main(int argc, char** argv){
         return 0;
     }
     if(pid==0){
-      sprintf(array1, "%d", umbralBin);
-      sprintf(array2, "%d", umbralClas);
-      sprintf(array3, "%d", imprimir);
-      sprintf(array4, "%d", numImages);
-      char *arreglos[] = {nombreEntrada,array1,array2,array3,array4,nombreSalidaGS,nombreSalidaBin,NULL};
-      execv("./lectorImagen",arreglos);
+      sprintf(charUmbralBin, "%d", umbralBin);
+      sprintf(charUmbralClas, "%d", umbralClas);
+      sprintf(charImprimir, "%d", imprimir);
+      sprintf(charNumImages, "%d", numImages);
+      char *argumentos[] = {nombreEntrada,charUmbralBin,charUmbralClas,charImprimir,charNumImages,nombreSalidaGS,nombreSalidaBin,NULL};
+      execv("./imageReader",argumentos);
     }
     else{
       waitpid(pid, &status, 0);
     }
   }//fin del ciclo for para procesar las imagenes
-  printf("Ingresa un char para terminar\n");
-    getc(stdin);
+  free(nombreEntrada);
+  free(nombreSalidaGS);
+  free(nombreSalidaBin);
   return 0;
 }
