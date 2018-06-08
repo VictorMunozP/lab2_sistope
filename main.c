@@ -84,40 +84,7 @@ int main(int argc, char** argv){
 
   //ciclo for para procesar las imagenes, una a la vez
   for(i=1;i<numImages+1;i++){
-    /*
-    //Se construye nombre de entrada de las imagenes segun enunciado
-    char* nombreEntrada=malloc(sizeof(char)*22);
-    nombreEntrada=setNameInput(i);
 
-
-    //GS= GrayScale
-    unsigned char* imagen = loadImage(nombreEntrada, &bInfoHeader, &header);
-    char* nombreSalidaGS=malloc(sizeof(char)*22);
-    nombreSalidaGS=setNameOutputGS(i);
-    rgbToGrayScale(imagen,bInfoHeader);
-    saveImage(imagen, bInfoHeader, header,nombreSalidaGS);
-
-    //Bin= Binarize
-    unsigned char* imagen2 = loadImage(nombreEntrada, &bInfoHeader, &header);
-    char* nombreSalidaBin=malloc(sizeof(char)*22);
-    nombreSalidaBin=setNameOutputBin(i);
-    binarizeImage(imagen2,bInfoHeader,umbralBin);
-    saveImage(imagen2, bInfoHeader, header,nombreSalidaBin);
-
-    if(imprimir==1){
-      char* answerNB=malloc(sizeof(char)*4);
-      answerNB=nearlyBlack(imagen2,bInfoHeader,umbralClas);
-      if(answerNB[0]=='y'){
-        printf("|  imagen_%d  |      %s      |\n",i,answerNB);
-      }
-      else{
-          printf("|  imagen_%d  |      %s       |\n",i,answerNB);
-      }
-
-    }
-    free(imagen);
-    free(imagen2);
-    */
     char* nombreEntrada=malloc(sizeof(char)*22);
     nombreEntrada=setNameInput(i);
     char* nombreSalidaGS=malloc(sizeof(char)*22);
@@ -125,6 +92,14 @@ int main(int argc, char** argv){
     char* nombreSalidaBin=malloc(sizeof(char)*22);
     nombreSalidaBin=setNameOutputBin(i);
 
+    //Si no existe la imagen a procesar el programa termina
+    FILE* fp=fopen(nombreEntrada,"r");
+    if(fp){
+      fclose(fp);
+    }else{
+      printf("File '%s' not found, execution canceled.\n",nombreEntrada);
+      return 0;}
+    //------------------------------------------------------------
     pid=fork();
     if (pid<0){
         printf("Error: child not created\n");
@@ -141,7 +116,9 @@ int main(int argc, char** argv){
     else{
       waitpid(pid, &status, 0);
     }
+    free(nombreEntrada);
+    free(nombreSalidaGS);
+    free(nombreSalidaBin);
   }//fin del ciclo for para procesar las imagenes
-
   return 0;
 }

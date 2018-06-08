@@ -16,7 +16,7 @@
 #include <sys/wait.h>
 
 /**
-* saveImage: funcion que abre una imagen (crea si no existe) y guarda en memoria principal toda su informacion
+* saveImage: funcion que abre una imagen (crea si no existe) y guarda en memoria secundaria toda su informacion
 * @param array: arreglo de caracteres con los datos de la imagen a guardar
 * @param bInfoHeader: puntero a la estrucutura que guarda informacion de la imagen
 * @paramheader: puntero a la estructura que contiene el header de la imagen
@@ -73,7 +73,7 @@ int main(int argc,char *argv[]) {
     read(pipeline,&binformacion.colors,sizeof(uint32_t));
     read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
 
-    unsigned char *data_writer = (unsigned char*)malloc(binformacion.imgsize * sizeof(unsigned char));
+    unsigned char* data_writer = (unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
     for(int i = 0;i < binformacion.imgsize;i++){
         read(pipeline,&data_writer[i],sizeof(unsigned char));
     }

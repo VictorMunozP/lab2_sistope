@@ -26,8 +26,8 @@ unsigned char* rgbToGrayScale(unsigned char* array, bmpInfoHeader bInfoHeader){
   int i,j,y,azul,verde,rojo,indice=0;
   //SE TRATA LA IMAGEN CON LA FORMULA
   //Se recorre segun ancho y largo
-  for(i=0; i < bInfoHeader.height; i++){
-			for(j=0; j < bInfoHeader.width; j++){
+  for(i=0;i<bInfoHeader.height;i++){
+			for(j=0;j<bInfoHeader.width;j++){
 			     //los componentes alfa, r*0.3, g*0.59 ,b*0.11 de un pixel
            azul=array[indice]*0.11;//azul
            indice++;
@@ -44,6 +44,16 @@ unsigned char* rgbToGrayScale(unsigned char* array, bmpInfoHeader bInfoHeader){
 	}
   return array;
 }
+
+/**
+* saveImage: funcion que abre una imagen (crea si no existe) y guarda en memoria secundaria toda su informacion,
+*             es utilizada para guardar la imagen en escala de grises.
+* @param array: arreglo de caracteres con los datos de la imagen a guardar
+* @param bInfoHeader: puntero a la estrucutura que guarda informacion de la imagen
+* @paramheader: puntero a la estructura que contiene el header de la imagen
+* @param filename: nombre de la imagen a cargar
+* @return -
+*/
 void saveImageGS(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader header, char* filename){
 	//Se crea/abre el archivo de la imagen a escribir, con permisos de lectura/escritura para user y group, y de solo lectura para others
   int imagen= open(filename, O_CREAT | O_WRONLY,S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH);
@@ -76,13 +86,13 @@ void saveImageGS(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader 
 int main(int argc,char* argv[]) {
     pid_t pid;
     int status;
-    int pipelineC[2];
+    int pipelineGS[2];
 
     bmpInfoHeader binformacion;
     bmpFileHeader bcabecera;
     int pipeline = atoi(argv[3]);
-    char *cambio = (char *)malloc(2 * sizeof(char));
-    //lectura de la data en el pipe
+    char* nextPipe = (char*)malloc(sizeof(char)*2);
+    
     read(pipeline,&bcabecera.size,sizeof(uint32_t));
     read(pipeline,&bcabecera.resv1,sizeof(uint16_t));
     read(pipeline,&bcabecera.resv2,sizeof(uint16_t));
@@ -100,52 +110,51 @@ int main(int argc,char* argv[]) {
     read(pipeline,&binformacion.colors,sizeof(uint32_t));
     read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
 
-    unsigned char *data_imagen = (unsigned char*)malloc(binformacion.imgsize* sizeof(unsigned char));
+    unsigned char* dataImg=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
     for(int i = 0;i < binformacion.imgsize;i++){
-        read(pipeline,&data_imagen[i],sizeof(unsigned char));
+        read(pipeline,&dataImg[i],sizeof(unsigned char));
     }
-    unsigned char* data_grisaseos=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
+    //unsigned char* dataGS=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
 
-    data_grisaseos = data_imagen;
-    rgbToGrayScale(data_grisaseos,binformacion);
-    saveImageGS(data_grisaseos,binformacion,bcabecera,argv[5]);
+    //dataGS=dataImg;
+    rgbToGrayScale(dataImg,binformacion);
+    saveImageGS(dataImg,binformacion,bcabecera,argv[5]);
 
-    pipe(pipelineC);
-    pid = fork();
-    if (pid < 0){
-        printf("Error al crear proceso hijo \n");
+    pipe(pipelineGS);
+    pid=fork();
+    if (pid<0){
+        printf("Error: child process not created\n");
         return 0;
     }
-    if(pid == 0){
-        sprintf(cambio,"%d",pipelineC[0]);
-        char *arreglos[] = {argv[0],argv[1],argv[2],cambio,argv[4],argv[5],argv[6],argv[7],NULL};
-        execv("./imageBinarizer",arreglos);
-        //printf("Soy el hijo %d de conversorGris (%d)",getpid(),getppid());
+    if(pid==0){
+        sprintf(nextPipe,"%d",pipelineGS[0]);
+        char* arguments[] = {argv[0],argv[1],argv[2],nextPipe,argv[4],argv[5],argv[6],argv[7],NULL};
+        execv("./imageBinarizer",arguments);
     }
     else{
-        close(pipelineC[0]);
-        write(pipelineC[1],&bcabecera.size,sizeof(uint32_t));
-        write(pipelineC[1],&bcabecera.resv1,sizeof(uint16_t));
-        write(pipelineC[1],&bcabecera.resv2,sizeof(uint16_t));
-        write(pipelineC[1],&bcabecera.offset,sizeof(uint32_t));
+        close(pipelineGS[0]);
+        write(pipelineGS[1],&bcabecera.size,sizeof(uint32_t));
+        write(pipelineGS[1],&bcabecera.resv1,sizeof(uint16_t));
+        write(pipelineGS[1],&bcabecera.resv2,sizeof(uint16_t));
+        write(pipelineGS[1],&bcabecera.offset,sizeof(uint32_t));
 
-        write(pipelineC[1],&binformacion.headersize,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.width,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.height,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.planes,sizeof(uint16_t));
-        write(pipelineC[1],&binformacion.bpp,sizeof(uint16_t));
-        write(pipelineC[1],&binformacion.compress,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.imgsize,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.bpmx,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.bpmy,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.colors,sizeof(uint32_t));
-        write(pipelineC[1],&binformacion.imxtcolors,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.headersize,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.width,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.height,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.planes,sizeof(uint16_t));
+        write(pipelineGS[1],&binformacion.bpp,sizeof(uint16_t));
+        write(pipelineGS[1],&binformacion.compress,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.imgsize,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.bpmx,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.bpmy,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.colors,sizeof(uint32_t));
+        write(pipelineGS[1],&binformacion.imxtcolors,sizeof(uint32_t));
 
 
-        for(int i = 0;i < binformacion.imgsize;i++){
-            write(pipelineC[1],&data_imagen[i],sizeof(unsigned char));
+        for(int i=0;i<binformacion.imgsize;i++){
+            write(pipelineGS[1],&dataImg[i],sizeof(unsigned char));
         }
-        free(data_grisaseos);
+        //free(dataGS);
         waitpid(pid, &status, 0);
     }
   return 0;

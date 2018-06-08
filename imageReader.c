@@ -61,9 +61,9 @@ int main(int arg, char** argv){
   int pipeline[2];
   bmpInfoHeader binformacion;
   bmpFileHeader bcabecera;
-  unsigned char* img_data;
+  unsigned char* dataImg;
   char* charPipeline = (char*)malloc(sizeof(char)*2);
-  img_data = loadImage(argv[0],&binformacion,&bcabecera);
+  dataImg = loadImage(argv[0],&binformacion,&bcabecera);
   pipe(pipeline);
   pid = fork();
       if (pid < 0){
@@ -72,7 +72,7 @@ int main(int arg, char** argv){
       }
       if(pid == 0){
   	     sprintf(charPipeline,"%d",pipeline[0]);
-         char *arguments[] = {argv[1],argv[2],argv[3],charPipeline,argv[4],argv[5],argv[6],argv[0],NULL};
+         char* arguments[] = {argv[1],argv[2],argv[3],charPipeline,argv[4],argv[5],argv[6],argv[0],NULL};
          execv("./imageToGrayScale",arguments);
        }
        else{
@@ -95,7 +95,7 @@ int main(int arg, char** argv){
          write(pipeline[1],&binformacion.imxtcolors,sizeof(uint32_t));
 
          for(int i = 0;i < binformacion.imgsize;i++){
-           write(pipeline[1],&img_data[i],sizeof(unsigned char));
+           write(pipeline[1],&dataImg[i],sizeof(unsigned char));
          }
          waitpid(pid, &status, 0);
        }
