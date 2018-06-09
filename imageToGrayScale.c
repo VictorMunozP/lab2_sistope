@@ -83,42 +83,49 @@ void saveImageGS(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader 
   }
 }
 
+/**
+* Funcion principal
+* @param argc cantidad de parametros recibidos desde el proceso anterior
+* @param argv arreglo de parametros recibidos
+* @return entero
+*/
 int main(int argc,char* argv[]) {
     pid_t pid;
     int status;
     int pipelineGS[2];
 
-    bmpInfoHeader binformacion;
-    bmpFileHeader bcabecera;
+    bmpInfoHeader infoHeader;
+    bmpFileHeader fileHeader;
     int pipeline = atoi(argv[3]);
     char* nextPipe = (char*)malloc(sizeof(char)*2);
     
-    read(pipeline,&bcabecera.size,sizeof(uint32_t));
-    read(pipeline,&bcabecera.resv1,sizeof(uint16_t));
-    read(pipeline,&bcabecera.resv2,sizeof(uint16_t));
-    read(pipeline,&bcabecera.offset,sizeof(uint32_t));
+    //se lee la imagen desde el pipe------------------------------
+    read(pipeline,&fileHeader.size,sizeof(uint32_t));
+    read(pipeline,&fileHeader.resv1,sizeof(uint16_t));
+    read(pipeline,&fileHeader.resv2,sizeof(uint16_t));
+    read(pipeline,&fileHeader.offset,sizeof(uint32_t));
 
-    read(pipeline,&binformacion.headersize,sizeof(uint32_t));
-    read(pipeline,&binformacion.width,sizeof(uint32_t));
-    read(pipeline,&binformacion.height,sizeof(uint32_t));
-    read(pipeline,&binformacion.planes,sizeof(uint16_t));
-    read(pipeline,&binformacion.bpp,sizeof(uint16_t));
-    read(pipeline,&binformacion.compress,sizeof(uint32_t));
-    read(pipeline,&binformacion.imgsize,sizeof(uint32_t));
-    read(pipeline,&binformacion.bpmx,sizeof(uint32_t));
-    read(pipeline,&binformacion.bpmy,sizeof(uint32_t));
-    read(pipeline,&binformacion.colors,sizeof(uint32_t));
-    read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
+    read(pipeline,&infoHeader.headersize,sizeof(uint32_t));
+    read(pipeline,&infoHeader.width,sizeof(uint32_t));
+    read(pipeline,&infoHeader.height,sizeof(uint32_t));
+    read(pipeline,&infoHeader.planes,sizeof(uint16_t));
+    read(pipeline,&infoHeader.bpp,sizeof(uint16_t));
+    read(pipeline,&infoHeader.compress,sizeof(uint32_t));
+    read(pipeline,&infoHeader.imgsize,sizeof(uint32_t));
+    read(pipeline,&infoHeader.bpmx,sizeof(uint32_t));
+    read(pipeline,&infoHeader.bpmy,sizeof(uint32_t));
+    read(pipeline,&infoHeader.colors,sizeof(uint32_t));
+    read(pipeline,&infoHeader.imxtcolors,sizeof(uint32_t));
 
-    unsigned char* dataImg=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
-    for(int i = 0;i < binformacion.imgsize;i++){
+    unsigned char* dataImg=(unsigned char*)malloc(sizeof(unsigned char)*infoHeader.imgsize);
+    for(int i = 0;i < infoHeader.imgsize;i++){
         read(pipeline,&dataImg[i],sizeof(unsigned char));
     }
-    //unsigned char* dataGS=(unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
+    //-------------------------------------------------------------
 
-    //dataGS=dataImg;
-    rgbToGrayScale(dataImg,binformacion);
-    saveImageGS(dataImg,binformacion,bcabecera,argv[5]);
+
+    rgbToGrayScale(dataImg,infoHeader);//se convierte la imagen leida en proceso anterior a escala de grises
+    saveImageGS(dataImg,infoHeader,fileHeader,argv[5]);//se escribe en memoria secundaria la imagen en escala de grises
 
     pipe(pipelineGS);
     pid=fork();
@@ -128,34 +135,36 @@ int main(int argc,char* argv[]) {
     }
     if(pid==0){
         sprintf(nextPipe,"%d",pipelineGS[0]);
+        //se crea un arreglo de argumentos que se pasan al siguiente proceso
         char* arguments[] = {argv[0],argv[1],argv[2],nextPipe,argv[4],argv[5],argv[6],argv[7],NULL};
         execv("./imageBinarizer",arguments);
     }
     else{
+        //se cierra la lectura del pipe ya que solo se escribira en el------------------
         close(pipelineGS[0]);
-        write(pipelineGS[1],&bcabecera.size,sizeof(uint32_t));
-        write(pipelineGS[1],&bcabecera.resv1,sizeof(uint16_t));
-        write(pipelineGS[1],&bcabecera.resv2,sizeof(uint16_t));
-        write(pipelineGS[1],&bcabecera.offset,sizeof(uint32_t));
+        write(pipelineGS[1],&fileHeader.size,sizeof(uint32_t));
+        write(pipelineGS[1],&fileHeader.resv1,sizeof(uint16_t));
+        write(pipelineGS[1],&fileHeader.resv2,sizeof(uint16_t));
+        write(pipelineGS[1],&fileHeader.offset,sizeof(uint32_t));
 
-        write(pipelineGS[1],&binformacion.headersize,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.width,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.height,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.planes,sizeof(uint16_t));
-        write(pipelineGS[1],&binformacion.bpp,sizeof(uint16_t));
-        write(pipelineGS[1],&binformacion.compress,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.imgsize,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.bpmx,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.bpmy,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.colors,sizeof(uint32_t));
-        write(pipelineGS[1],&binformacion.imxtcolors,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.headersize,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.width,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.height,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.planes,sizeof(uint16_t));
+        write(pipelineGS[1],&infoHeader.bpp,sizeof(uint16_t));
+        write(pipelineGS[1],&infoHeader.compress,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.imgsize,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.bpmx,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.bpmy,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.colors,sizeof(uint32_t));
+        write(pipelineGS[1],&infoHeader.imxtcolors,sizeof(uint32_t));
 
-
-        for(int i=0;i<binformacion.imgsize;i++){
+        for(int i=0;i<infoHeader.imgsize;i++){
             write(pipelineGS[1],&dataImg[i],sizeof(unsigned char));
         }
-        //free(dataGS);
-        waitpid(pid, &status, 0);
+        //--------------------------------------------------------------------------------------
+        
+        waitpid(pid, &status, 0);//Esperamos hasta que el proceso pid (hijo) cambie de estado
     }
   return 0;
 }

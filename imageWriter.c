@@ -52,32 +52,41 @@ void saveImage(unsigned char* array, bmpInfoHeader bInfoHeader, bmpFileHeader he
   }
 }
 
+/**
+* Funcion principal
+* @param argc cantidad de parametros recibidos desde el proceso anterior
+* @param argv arreglo de parametros recibidos
+* @return entero
+*/
 int main(int argc,char *argv[]) {
-    bmpInfoHeader binformacion;
-    bmpFileHeader bcabecera;
-    int pipeline = atoi(argv[0]);
-    read(pipeline,&bcabecera.size,sizeof(uint32_t));
-    read(pipeline,&bcabecera.resv1,sizeof(uint16_t));
-    read(pipeline,&bcabecera.resv2,sizeof(uint16_t));
-    read(pipeline,&bcabecera.offset,sizeof(uint32_t));
+    bmpInfoHeader infoHeader;
+    bmpFileHeader fileHeader;
+    int pipeline=atoi(argv[0]);
 
-    read(pipeline,&binformacion.headersize,sizeof(uint32_t));
-    read(pipeline,&binformacion.width,sizeof(uint32_t));
-    read(pipeline,&binformacion.height,sizeof(uint32_t));
-    read(pipeline,&binformacion.planes,sizeof(uint16_t));
-    read(pipeline,&binformacion.bpp,sizeof(uint16_t));
-    read(pipeline,&binformacion.compress,sizeof(uint32_t));
-    read(pipeline,&binformacion.imgsize,sizeof(uint32_t));
-    read(pipeline,&binformacion.bpmx,sizeof(uint32_t));
-    read(pipeline,&binformacion.bpmy,sizeof(uint32_t));
-    read(pipeline,&binformacion.colors,sizeof(uint32_t));
-    read(pipeline,&binformacion.imxtcolors,sizeof(uint32_t));
+    //se carga la imagen leyendo desde el pipe-------------------------------------------
+    read(pipeline,&fileHeader.size,sizeof(uint32_t));
+    read(pipeline,&fileHeader.resv1,sizeof(uint16_t));
+    read(pipeline,&fileHeader.resv2,sizeof(uint16_t));
+    read(pipeline,&fileHeader.offset,sizeof(uint32_t));
 
-    unsigned char* data_writer = (unsigned char*)malloc(sizeof(unsigned char)*binformacion.imgsize);
-    for(int i = 0;i < binformacion.imgsize;i++){
-        read(pipeline,&data_writer[i],sizeof(unsigned char));
+    read(pipeline,&infoHeader.headersize,sizeof(uint32_t));
+    read(pipeline,&infoHeader.width,sizeof(uint32_t));
+    read(pipeline,&infoHeader.height,sizeof(uint32_t));
+    read(pipeline,&infoHeader.planes,sizeof(uint16_t));
+    read(pipeline,&infoHeader.bpp,sizeof(uint16_t));
+    read(pipeline,&infoHeader.compress,sizeof(uint32_t));
+    read(pipeline,&infoHeader.imgsize,sizeof(uint32_t));
+    read(pipeline,&infoHeader.bpmx,sizeof(uint32_t));
+    read(pipeline,&infoHeader.bpmy,sizeof(uint32_t));
+    read(pipeline,&infoHeader.colors,sizeof(uint32_t));
+    read(pipeline,&infoHeader.imxtcolors,sizeof(uint32_t));
+
+    unsigned char* dataImg=(unsigned char*)malloc(sizeof(unsigned char)*infoHeader.imgsize);
+    for(int i=0;i<infoHeader.imgsize;i++){
+        read(pipeline,&dataImg[i],sizeof(unsigned char));
     }
+    //-----------------------------------------------------------------------------------------
 
-    saveImage(data_writer,binformacion,bcabecera,argv[1]);
+    saveImage(dataImg,infoHeader,fileHeader,argv[1]);//se escribe la imagen binarizada en memoria secundaria
     return 0;
 }

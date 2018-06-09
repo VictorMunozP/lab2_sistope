@@ -86,13 +86,13 @@ int main(int argc, char** argv){
   for(i=1;i<numImages+1;i++){
 
     char* nombreEntrada=malloc(sizeof(char)*22);
-    nombreEntrada=setNameInput(i);
+    nombreEntrada=setNameInput(i); //setNameInput() function in file functions.c 
     char* nombreSalidaGS=malloc(sizeof(char)*22);
     nombreSalidaGS=setNameOutputGS(i);
     char* nombreSalidaBin=malloc(sizeof(char)*22);
     nombreSalidaBin=setNameOutputBin(i);
 
-    //Si no existe la imagen a procesar el programa termina
+    //Si no existe la imagen a procesar el programa termina-------
     FILE* fp=fopen(nombreEntrada,"r");
     if(fp){
       fclose(fp);
@@ -100,6 +100,7 @@ int main(int argc, char** argv){
       printf("File '%s' not found, execution canceled.\n",nombreEntrada);
       return 0;}
     //------------------------------------------------------------
+      
     pid=fork();
     if (pid<0){
         printf("Error: child not created\n");
@@ -110,11 +111,12 @@ int main(int argc, char** argv){
       sprintf(charUmbralClas, "%d", umbralClas);
       sprintf(charImprimir, "%d", imprimir);
       sprintf(charNumImages, "%d", i);
-      char *argumentos[] = {nombreEntrada,charUmbralBin,charUmbralClas,charImprimir,charNumImages,nombreSalidaGS,nombreSalidaBin,NULL};
-      execv("./imageReader",argumentos);
+      //se crea un arreglo de char* para pasar los parametros al siguiente proceso
+      char* arguments[]={nombreEntrada,charUmbralBin,charUmbralClas,charImprimir,charNumImages,nombreSalidaGS,nombreSalidaBin,NULL};
+      execv("./imageReader",arguments);
     }
     else{
-      waitpid(pid, &status, 0);
+      waitpid(pid, &status, 0);//Esperamos hasta que el proceso pid (hijo) cambie de estado
     }
     free(nombreEntrada);
     free(nombreSalidaGS);
